@@ -47,8 +47,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/syncthing` - Data storage
-- `./rootfs/data/syncthing` - Data storage
+- `./volumes/config/syncthing` - Data storage
+- `./volumes/data/syncthing` - Data storage
 
 ## 🔍 Logging
 
