@@ -21,8 +21,8 @@ services:
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
     volumes:
-      - ./rootfs/config/syncthing:/config
-      - ./rootfs/data/syncthing:/data
+      - ./volumes/config/syncthing:/config
+      - ./volumes/data/syncthing:/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8384"]
       interval: 30s
