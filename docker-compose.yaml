@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:8384
 
+name: syncthing
 x-logging: &default-logging
   driver: json-file
   options:
@@ -9,20 +10,25 @@ x-logging: &default-logging
 services:
   syncthing:
     image: syncthing/syncthing:latest
+    pull_policy: always
     container_name: syncthing-app
-    restart: unless-stopped
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
     logging: *default-logging
     networks:
       - syncthing
     ports:
-      - "8384:8384"
+      - "172.17.0.1:8384:8384"
+      - "22000:22000/tcp"
+      - "22000:22000/udp"
+      - "21027:21027/udp"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
     volumes:
-      - ./volumes/config/syncthing:/config
-      - ./volumes/data/syncthing:/data
+      - ./volumes/config/syncthing:/var/syncthing/config
+      - ./volumes/data/syncthing:/var/syncthing/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8384"]
       interval: 30s
@@ -31,4 +37,5 @@ services:
 
 networks:
   syncthing:
+    name: syncthing
     external: false
