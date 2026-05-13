@@ -32,7 +32,7 @@ services:
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/syncthing:/var/syncthing/config
-      - ./volumes/data/syncthing:/var/syncthing/data
+      - ./volumes/data/syncthing:/var/syncthing/Sync
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8384"]
       interval: 30s
