@@ -17,6 +17,8 @@ services:
     logging: *default-logging
     networks:
       - syncthing
+      - proxy
+      - cloudflare
     ports:
       - "172.17.0.1:8384:8384"
       - "22000:22000/tcp"
@@ -26,6 +28,8 @@ services:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
+      CONTAINER_NAME: syncthing-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/syncthing:/var/syncthing/config
       - ./volumes/data/syncthing:/var/syncthing/data
@@ -34,8 +38,28 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://syncthing-app:8384'
+      - 'cloudflare.hostname=syncthing.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.syncthing-app.entrypoints=http'
+      - 'traefik.http.routers.syncthing-app-secure.tls=true'
+      - 'traefik.http.routers.syncthing-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.syncthing-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.syncthing-app.middlewares=syncthing-app-https-redirect'
+      - 'traefik.http.routers.syncthing-app-secure.entrypoints=https'
+      - 'traefik.http.routers.syncthing-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.syncthing-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.syncthing-app-secure.service=syncthing-app'
+      - 'traefik.http.services.syncthing-app.loadbalancer.server.port=8384'
 
 networks:
   syncthing:
     name: syncthing
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
